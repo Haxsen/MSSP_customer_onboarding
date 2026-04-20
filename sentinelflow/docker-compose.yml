@@ -34,13 +34,23 @@ services:
     ports:
       - "443:5601"
     environment:
-      - WAZUH_MANAGER_URL=https://wazuh-manager:55000
-      - OPENSEARCH_HOSTS=https://demo.indexer:9200
-      - OPENSEARCH_SSL_VERIFICATION_MODE=none
+      - INDEXER_HOSTS=https://wazuh.indexer:9200
+      #- WAZUH_MANAGER_URL=https://wazuh-manager:55000
+      - WAZUH_API_URL=https://wazuh-manager
+      - WAZUH_API_USER=wazuh-wui
+      - WAZUH_API_PASSWORD=wazuh-wui
       - WAZUH_MANAGER_SSL_VERIFICATION=false
-      - DISABLE_SECURITY_DASHBOARD_PLUGIN=false
-      - INDEXER_USER=admin
-      - INDEXER_PASSWORD=SecretPassword
+      - OPENSEARCH_SSL_VERIFICATION_MODE=none
+#      - WAZUH_MANAGER_URL=https://wazuh-manager:55000
+ #     - OPENSEARCH_HOSTS=https://demo.indexer:9200
+  #    - OPENSEARCH_SSL_VERIFICATION_MODE=none
+   #   - WAZUH_MANAGER_SSL_VERIFICATION=false
+    #  - DISABLE_SECURITY_DASHBOARD_PLUGIN=false
+     # - INDEXER_USER=admin
+      #- INDEXER_PASSWORD=SecretPassword
+ #     - INDEXER_HOSTS=https://wazuh.indexer:9200
+  #    - WAZUH_API_USER=wazuh-wui        # Default user for Dashboard-to-API
+   #   - WAZUH_API_PASSWORD=wazuh-wui    # Default password
     depends_on:
       - wazuh-indexer
 
