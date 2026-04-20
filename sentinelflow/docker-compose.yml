@@ -1,0 +1,84 @@
+services:
+  # --- 1. DETECTION LAYER (WAZUH) ---
+  wazuh-indexer:
+    image: wazuh/wazuh-indexer:4.7.2
+    networks:
+      sentinel-net:
+        aliases:
+          - demo.indexer
+          - wazuh.indexer
+    environment:
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "discovery.type=single-node"
+      - "plugins.security.nodes_dn_dynamic_config_enabled=true"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - wazuh-indexer-data:/var/lib/wazuh-indexer
+
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.7.2
+    networks:
+      - sentinel-net
+    ports:
+      - "1514:1514" # Agent connection
+      - "56000:55000" # Manager API (Crucial for n8n)
+    volumes:
+      - wazuh-manager-data:/var/ossec/data
+
+  wazuh-dashboard:
+    image: wazuh/wazuh-dashboard:4.7.2
+    networks:
+      - sentinel-net
+    ports:
+      - "443:5601"
+    environment:
+      - WAZUH_MANAGER_URL=https://wazuh-manager:55000
+      - OPENSEARCH_HOSTS=https://demo.indexer:9200
+      - OPENSEARCH_SSL_VERIFICATION_MODE=none
+      - WAZUH_MANAGER_SSL_VERIFICATION=false
+      - DISABLE_SECURITY_DASHBOARD_PLUGIN=false
+      - INDEXER_USER=admin
+      - INDEXER_PASSWORD=SecretPassword
+    depends_on:
+      - wazuh-indexer
+
+  # --- 2. DATA LAYER (DIRECTUS) ---
+  directus:
+    image: directus/directus:latest
+    networks:
+      - sentinel-net
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: "sentinel-secret-key"
+      SECRET: "sentinel-super-secret"
+      DB_CLIENT: "sqlite3"
+      DB_FILENAME: "/directus/database/data.db"
+      ADMIN_EMAIL: "admin@example.com"
+      ADMIN_PASSWORD: "password"
+    volumes:
+      - ./directus-data:/directus/database
+
+  # --- 3. AUTOMATION LAYER (n8n) ---
+  n8n:
+    image: n8nio/n8n:latest
+    networks:
+      - sentinel-net
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=password
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+
+networks:
+  sentinel-net:
+    driver: bridge
+
+volumes:
+  wazuh-indexer-data:
+  wazuh-manager-data:
