@@ -2,8 +2,8 @@
 ## SentinelFlow: Automated MSSP Stack
 ### Stack: Wazuh (SIEM), Directus (Control Plane), n8n (Automation), Docker.
 
-### The Problem: Manual onboarding for security clients is slow.
-### The Solution: I built a pipeline where adding a client to the Directus DB automatically provisions security groups and API keys in Wazuh via n8n.
+**The Problem**: Manual onboarding for security clients is slow.
+**The Solution**: I built a pipeline where adding a client to the Directus DB automatically provisions security groups and API keys in Wazuh via n8n.
 
 ## Key Skills Demonstrated:
 
